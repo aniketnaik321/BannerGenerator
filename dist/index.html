@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WaveBanner Pro - Modern Banner Designer</title>
+    <!-- Google Fonts Import -->
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Montserrat:wght@400;700&family=Open+Sans:wght@400;700&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        #app-container {
+            display: flex;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            max-width: 1600px; /* Increased max-width to accommodate preview */
+            width: 100%;
+        }
+
+        /* Controls Panel */
+        #controls-panel {
+            width: 350px;
+            padding: 25px;
+            border-right: 1px solid #eee;
+            overflow-y: auto;
+            max-height: calc(100vh - 40px); /* Adjust based on body padding */
+            box-sizing: border-box;
+            flex-shrink: 0; /* Prevent shrinking */
+        }
+
+        #controls-panel h2 {
+            color: #2c3e50;
+            margin-top: 0;
+            margin-bottom: 25px;
+            font-size: 1.6em;
+            text-align: center;
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #eee;
+        }
+
+        .control-group h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #4a69bd;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+        }
+        .control-group h3 svg {
+            transition: transform 0.2s ease-in-out;
+        }
+        .control-group.collapsed .control-content {
+            display: none;
+        }
+        .control-group.collapsed h3 svg {
+            transform: rotate(-90deg);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+            font-size: 0.9em;
+        }
+
+        input[type="number"],
+        input[type="text"],
+        input[type="color"],
+        select,
+        textarea {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.9em;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+
+        input[type="number"]:focus,
+        input[type="text"]:focus,
+        input[type="color"]:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #4a69bd;
+            box-shadow: 0 0 0 2px rgba(74, 105, 189, 0.2);
+        }
+
+        input[type="color"] {
+            width: 70px;
+            height: 38px;
+            padding: 5px;
+            cursor: pointer;
+        }
+        input[type="checkbox"] {
+            margin-right: 8px;
+        }
+
+        .input-pair {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .input-pair > div {
+            flex: 1;
+        }
+
+        .color-palette {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .color-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 8px;
+        }
+        .remove-color-btn {
+            background: none;
+            border: none;
+            color: #dc3545;
+            cursor: pointer;
+            font-size: 1.2em;
+            line-height: 1;
+            padding: 0;
+            margin: 0;
+            transition: color 0.2s;
+        }
+        .remove-color-btn:hover {
+            color: #c82333;
+        }
+        .add-color-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.2s;
+            margin-top: 5px;
+        }
+        .add-color-btn:hover {
+            background-color: #218838;
+        }
+
+        /* Canvas Area */
+        #main-display {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #canvas-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 25px;
+            border-bottom: 1px solid #eee; /* Separator for preview */
+        }
+
+        #bannerCanvas {
+            border: 2px dashed #ccc;
+            background-color: #fdfdfd;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            max-width: 100%; /* Ensure canvas scales within its container */
+            height: auto;
+            display: block; /* Remove extra space below canvas */
+        }
+
+        #download-section {
+            margin-top: 25px;
+            text-align: center;
+        }
+
+        #downloadBtn {
+            background-color: #4CAF50; /* Green */
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0, 128, 0, 0.2);
+        }
+
+        #downloadBtn:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+        }
+
+        /* Preview Container */
+        #preview-container {
+            flex-grow: 1;
+            padding: 25px;
+            background-color: #fcfcfc;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        #preview-container h3 {
+            color: #2c3e50;
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 1.4em;
+            text-align: center;
+        }
+
+        .preview-mode-selector {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .preview-btn {
+            background-color: #e0e0e0;
+            color: #555;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .preview-btn.active {
+            background-color: #4a69bd;
+            color: white;
+            box-shadow: 0 2px 5px rgba(74, 105, 189, 0.3);
+        }
+        .preview-btn:hover:not(.active) {
+            background-color: #d0d0d0;
+        }
+
+        #preview-display {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .preview-section {
+            display: none; /* Hidden by default */
+            width: 100%;
+            max-width: 800px;
+            background-color: #fff;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            box-sizing: border-box;
+            text-align: center;
+        }
+        .preview-section.active {
+            display: block; /* Shown when active */
+        }
+        .preview-section p {
+            font-style: italic;
+            color: #777;
+            margin-bottom: 15px;
+        }
+
+        .mock-banner-img {
+            display: block;
+            width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        /* Mockup Styles - Hero Section */
+        .hero-mock-wrapper {
+            background-color: #f8f8f8;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #eee;
+        }
+        .mock-content h1 {
+            font-size: 1.8em;
+            color: #333;
+            margin-top: 15px;
+            margin-bottom: 10px;
+        }
+        .mock-content button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-bottom: 5px;
+        }
+
+        /* Mockup Styles - Product Card */
+        .product-card-mock-wrapper {
+            width: 300px; /* Fixed width for card */
+            margin: 0 auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #fff;
+            padding-bottom: 15px;
+        }
+        .mock-product-image {
+            height: 180px;
+            background-color: #eee;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9em;
+            color: #888;
+            border-bottom: 1px solid #ddd;
+        }
+        .mock-banner-placeholder {
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-bottom: 1px solid #ddd;
+        }
+        .product-card-mock-wrapper h4 {
+            font-size: 1.2em;
+            margin: 15px 0 5px;
+            color: #333;
+        }
+        .product-card-mock-wrapper .price {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #e67e22;
+            margin-bottom: 15px;
+            display: block;
+        }
+        .product-card-mock-wrapper button {
+            background-color: #28a745;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        /* Mockup Styles - Slider Banner */
+        .slider-mock-wrapper {
+            position: relative;
+            background-color: #f8f8f8;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .slider-mock-wrapper .mock-banner-img {
+            margin: 0;
+            width: 80%; /* Smaller to show nav buttons */
+        }
+        .slider-nav-mock {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2em;
+            user-select: none;
+        }
+        .slider-nav-mock.left { left: 10px; }
+        .slider-nav-mock.right { right: 10px; }
+
+
+        /* Responsiveness */
+        @media (max-width: 1200px) {
+            #app-container {
+                flex-direction: column;
+            }
+            #controls-panel {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #eee;
+                max-height: 50vh; /* Allow scrolling for controls on small screens */
+            }
+            #canvas-container {
+                padding: 15px;
+                border-bottom: none; /* No extra border when stacked */
+            }
+            #preview-container {
+                padding: 15px;
+                order: 3; /* Move preview below canvas */
+            }
+            .product-card-mock-wrapper {
+                width: 100%; /* Make product card responsive */
+            }
+        }
+        @media (max-width: 600px) {
+            .preview-mode-selector {
+                flex-direction: column;
+                width: 100%;
+            }
+            .preview-btn {
+                width: 100%;
+            }
+            #app-container {
+                padding: 10px;
+            }
+            body {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app-container">
+        <div id="controls-panel">
+            <h2>WaveBanner Pro</h2>
+
+            <div class="control-group" id="group-size">
+                <h3>Banner Size <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></h3>
+                <div class="control-content">
+                    <div class="input-pair">
+                        <div>
+                            <label for="bannerWidth">Width (px)</label>
+                            <input type="number" id="bannerWidth" value="1200" min="100">
+                        </div>
+                        <div>
+                            <label for="bannerHeight">Height (px)</label>
+                            <input type="number" id="bannerHeight" value="628" min="100">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-group" id="group-image">
+                <h3>Product Image <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></h3>
+                <div class="control-content">
+                    <label for="productImageUrl">Image URL</label>
+                    <input type="text" id="productImageUrl" placeholder="e.g., https://example.com/product.png">
+                    <label for="imageScale">Image Scale (%)</label>
+                    <input type="number" id="imageScale" value="80" min="10" max="200">
+                    <label for="imageX">Image X Offset (px)</label>
+                    <input type="number" id="imageX" value="0">
+                    <label for="imageY">Image Y Offset (px)</label>
+                    <input type="number" id="imageY" value="0">
+                </div>
+            </div>
+
+            <div class="control-group" id="group-image-filters">
+                <h3>Image Filters <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></h3>
+                <div class="control-content">
+                    <h4>Shadow Effect</h4>
+                    <label>
+                        <input type="checkbox" id="shadowEnabled"> Enable Shadow
+                    </label>
+                    <label for="shadowColor">Shadow Color</label>
+                    <input type="color" id="shadowColor" value="#000000">
+                    <label for="shadowBlur">Shadow Blur (px)</label>
+                    <input type="range" id="shadowBlur" min="0" max="50" value="10">
+                    <label for="shadowOffsetX">Shadow X Offset (px)</label>
+                    <input type="range" id="shadowOffsetX" min="-20" max="20" value="5">
+                    <label for="shadowOffsetY">Shadow Y Offset (px)</label>
+                    <input type="range" id="shadowOffsetY" min="-20" max="20" value="5">
+                </div>
+            </div>
+
+            <div class="control-group" id="group-gradient">
+                <h3>Background Gradient <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></h3>
+                <div class="control-content">
+                    <div class="color-palette" id="gradientColors">
+                        <div class="color-input-wrapper">
+                            <input type="color" value="#8e44ad" data-index="0">
+                            <button class="remove-color-btn" style="display:none;">&times;</button>
+                        </div>
+                        <div class="color-input-wrapper">
+                            <input type="color" value="#3498db" data-index="1">
+                            <button class="remove-color-btn" style="display:none;">&times;</button>
+                        </div>
+                    </div>
+                    <button id="addGradientColor" class="add-color-btn">Add Color</button>
+
+                    <label for="gradientDirection">Direction</label>
+                    <select id="gradientDirection">
+                        <option value="to right">Left to Right</option>
+                        <option value="to left">Right to Left</option>
+                        <option value="to bottom" selected>Top to Bottom</option>
+                        <option value="to top">Bottom to Top</option>
+                        <option value="to bottom right">Top-Left to Bottom-Right</option>
+                        <option value="to top left">Bottom-Right to Top-Left</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="control-group" id="group-waves">
+                <h3>Wave Effects <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></h3>
+                <div class="control-content">
+                    <h4>Layer 1 (Subtle Background)</h4>
+                    <label for="wave1Amplitude">Amplitude</label>
+                    <input type="range" id="wave1Amplitude" min="0" max="100" value="30">
+                    <label for="wave1Frequency">Frequency</label>
+                    <input type="range" id="wave1Frequency" min="0.001" max="0.05" step="0.001" value="0.01">
+                    <label for="wave1Offset">Offset</label>
+                    <input type="range" id="wave1Offset" min="0" max="20" step="0.1" value="0">
+                    <label for="wave1Opacity">Opacity</label>
+                    <input type="range" id="wave1Opacity" min="0" max="1" step="0.01" value="0.6">
+                    <label for="wave1HeightAdjust">Vertical Position</label>
+                    <input type="range" id="wave1HeightAdjust" min="-100" max="100" value="0">
+
+                    <h4>Layer 2 (Primary Effect)</h4>
+                    <label for="wave2Amplitude">Amplitude</label>
+                    <input type="range" id="wave2Amplitude" min="0" max="100" value="50">
+                    <label for="wave2Frequency">Frequency</label>
+                    <input type="range" id="wave2Frequency" min="0.001" max="0.05" step="0.001" value="0.005">
+                    <label for="wave2Offset">Offset</label>
+                    <input type="range" id="wave2Offset" min="0" max="20" step="0.1" value="5">
+                    <label for="wave2Opacity">Opacity</label>
+                    <input type="range" id="wave2Opacity" min="0" max="1" step="0.01" value="0.8">
+                    <label for="wave2HeightAdjust">Vertical Position</label>
+                    <input type="range" id="wave2HeightAdjust" min="-100" max="100" value="30">
+                </div>
+            </div>
+
+            <div class="control-group" id="group-text">
+                <h3>Text Overlays <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></h3>
+                <div class="control-content">
+                    <label for="headlineText">Headline Text</label>
+                    <input type="text" id="headlineText" value="Awesome New Product">
+                    <label for="headlineFont">Headline Font</label>
+                    <select id="headlineFont">
+                        <option value="Arial">Arial</option>
+                        <option value="Verdana">Verdana</option>
+                        <option value="Georgia">Georgia</option>
+                        <option value="Times New Roman">Times New Roman</option>
+                        <option value="Poppins" selected>Poppins</option>
+                        <option value="Montserrat">Montserrat</option>
+                        <option value="Lato">Lato</option>
+                        <option value="Open Sans">Open Sans</option>
+                    </select>
+                    <label for="headlineColor">Headline Color</label>
+                    <input type="color" id="headlineColor" value="#ffffff">
+                    <label for="headlineSize">Headline Size (px)</label>
+                    <input type="number" id="headlineSize" value="60" min="10">
+                    <label for="headlineY">Headline Y Offset (px)</label>
+                    <input type="number" id="headlineY" value="-80">
+
+                    <label for="subText">Slogan/CTA Text</label>
+                    <input type="text" id="subText" value="Shop Now & Save Big!">
+                    <label for="subTextFont">Slogan Font</label>
+                    <select id="subTextFont">
+                        <option value="Arial">Arial</option>
+                        <option value="Verdana">Verdana</option>
+                        <option value="Georgia">Georgia</option>
+                        <option value="Times New Roman">Times New Roman</option>
+                        <option value="Poppins" selected>Poppins</option>
+                        <option value="Montserrat">Montserrat</option>
+                        <option value="Lato">Lato</option>
+                        <option value="Open Sans">Open Sans</option>
+                    </select>
+                    <label for="subTextColor">Slogan Color</label>
+                    <input type="color" id="subTextColor" value="#f1c40f">
+                    <label for="subTextSize">Slogan Size (px)</label>
+                    <input type="number" id="subTextSize" value="30" min="8">
+                    <label for="subTextY">Slogan Y Offset (px)</label>
+                    <input type="number" id="subTextY" value="40">
+                </div>
+            </div>
+        </div>
+
+        <div id="main-display">
+            <div id="canvas-container">
+                <canvas id="bannerCanvas"></canvas>
+                <div id="download-section">
+                    <button id="downloadBtn">Download Banner</button>
+                </div>
+            </div>
+
+            <div id="preview-container">
+                <h3>Preview in Context</h3>
+                <div class="preview-mode-selector">
+                    <button class="preview-btn active" data-mode="hero">Website Hero</button>
+                    <button class="preview-btn" data-mode="product-card">Product Card</button>
+                    <button class="preview-btn" data-mode="slider">Slider Banner</button>
+                </div>
+
+                <div id="preview-display">
+                    <!-- Preview Section: Website Hero -->
+                    <div id="preview-hero" class="preview-section active">
+                        <p>Homepage Banner Section:</p>
+                        <div class="hero-mock-wrapper">
+                            <img id="previewHeroImage" class="mock-banner-img" alt="Hero Banner Preview">
+                        </div>
+                        <div class="mock-content">
+                            <h1>Explore Our Latest Collection</h1>
+                            <button>Shop All</button>
+                        </div>
+                    </div>
+
+                    <!-- Preview Section: Product Card -->
+                    <div id="preview-product-card" class="preview-section">
+                        <p>Product Detail Card:</p>
+                        <div class="product-card-mock-wrapper">
+                            <div class="mock-product-image">Product Image Placeholder</div>
+                            <div class="mock-banner-placeholder">
+                                <img id="previewProductCardImage" class="mock-banner-img" alt="Product Card Banner Preview">
+                            </div>
+                            <h4>Stylish Smartwatch</h4>
+                            <span class="price">$199.99</span>
+                            <button>Add to Cart</button>
+                        </div>
+                    </div>
+
+                    <!-- Preview Section: Slider Banner -->
+                    <div id="preview-slider" class="preview-section">
+                        <p>Image Slider Placeholder:</p>
+                        <div class="slider-mock-wrapper">
+                            <img id="previewSliderImage" class="mock-banner-img" alt="Slider Banner Preview">
+                            <div class="slider-nav-mock left">&lt;</div>
+                            <div class="slider-nav-mock right">&gt;</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('bannerCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // --- DOM Elements ---
+        const bannerWidthInput = document.getElementById('bannerWidth');
+        const bannerHeightInput = document.getElementById('bannerHeight');
+        const productImageUrlInput = document.getElementById('productImageUrl');
+        const imageScaleInput = document.getElementById('imageScale');
+        const imageXInput = document.getElementById('imageX');
+        const imageYInput = document.getElementById('imageY');
+
+        // New Image Filter Elements
+        const shadowEnabledInput = document.getElementById('shadowEnabled');
+        const shadowColorInput = document.getElementById('shadowColor');
+        const shadowBlurInput = document.getElementById('shadowBlur');
+        const shadowOffsetXInput = document.getElementById('shadowOffsetX');
+        const shadowOffsetYInput = document.getElementById('shadowOffsetY');
+
+        const gradientColorsContainer = document.getElementById('gradientColors');
+        const addGradientColorBtn = document.getElementById('addGradientColor');
+        const gradientDirectionInput = document.getElementById('gradientDirection');
+
+        const wave1AmplitudeInput = document.getElementById('wave1Amplitude');
+        const wave1FrequencyInput = document.getElementById('wave1Frequency');
+        const wave1OffsetInput = document.getElementById('wave1Offset');
+        const wave1OpacityInput = document.getElementById('wave1Opacity');
+        const wave1HeightAdjustInput = document.getElementById('wave1HeightAdjust');
+
+        const wave2AmplitudeInput = document.getElementById('wave2Amplitude');
+        const wave2FrequencyInput = document.getElementById('wave2Frequency');
+        const wave2OffsetInput = document.getElementById('wave2Offset');
+        const wave2OpacityInput = document.getElementById('wave2Opacity');
+        const wave2HeightAdjustInput = document.getElementById('wave2HeightAdjust');
+
+        const headlineTextInput = document.getElementById('headlineText');
+        const headlineFontInput = document.getElementById('headlineFont');
+        const headlineColorInput = document.getElementById('headlineColor');
+        const headlineSizeInput = document.getElementById('headlineSize');
+        const headlineYInput = document.getElementById('headlineY');
+
+        const subTextInput = document.getElementById('subText');
+        const subTextFontInput = document.getElementById('subTextFont');
+        const subTextColorInput = document.getElementById('subTextColor');
+        const subTextSizeInput = document.getElementById('subTextSize');
+        const subTextYInput = document.getElementById('subTextY');
+
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        // Preview Elements
+        const previewModeButtons = document.querySelectorAll('.preview-btn');
+        const previewSections = document.querySelectorAll('.preview-section');
+        const previewHeroImage = document.getElementById('previewHeroImage');
+        const previewProductCardImage = document.getElementById('previewProductCardImage');
+        const previewSliderImage = document.getElementById('previewSliderImage');
+
+        // --- Banner State (Default Values) ---
+        let bannerState = {
+            width: 1200,
+            height: 628,
+            productImage: {
+                url: '', // Default empty, user will input
+                imgObj: null,
+                scale: 80, // %
+                xOffset: 0, // px from center
+                yOffset: 0, // px from center
+                shadow: { // NEW: Shadow properties
+                    enabled: false,
+                    color: '#000000',
+                    blur: 10,
+                    offsetX: 5,
+                    offsetY: 5
+                }
+            },
+            gradient: {
+                colors: ['#8e44ad', '#3498db'],
+                direction: 'to bottom'
+            },
+            waves: [
+                { amplitude: 30, frequency: 0.01, offset: 0, opacity: 0.6, heightAdjust: 0, colorBlend: 0.3 },
+                { amplitude: 50, frequency: 0.005, offset: 5, opacity: 0.8, heightAdjust: 30, colorBlend: 0.7 }
+            ],
+            text: {
+                headline: {
+                    content: 'Awesome New Product',
+                    font: 'Poppins',
+                    color: '#ffffff',
+                    size: 60,
+                    yOffset: -80
+                },
+                subText: {
+                    content: 'Shop Now & Save Big!',
+                    font: 'Poppins',
+                    color: '#f1c40f',
+                    size: 30,
+                    yOffset: 40
+                }
+            }
+        };
+
+        // --- Helper Functions ---
+        function debounce(func, delay) {
+            let timeout;
+            return function(...args) {
+                const context = this;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), delay);
+            };
+        }
+
+        // Linear interpolation for color blending
+        function lerpColor(a, b, amount) {
+            const ah = parseInt(a.replace(/#/g, '0x'), 16),
+                  ar = ah >> 16, ag = (ah >> 8) & 0xff, ab = ah & 0xff,
+                  bh = parseInt(b.replace(/#/g, '0x'), 16),
+                  br = bh >> 16, bg = (bh >> 8) & 0xff, bb = bh & 0xff,
+                  rr = ar + amount * (br - ar),
+                  rg = ag + amount * (bg - ag),
+                  rb = ab + amount * (bb - ab);
+            return '#' + ((1 << 24) + (rr << 16) + (rg << 8) + rb | 0).toString(16).slice(1);
+        }
+
+        // --- Drawing Functions ---
+        function drawBanner() {
+            canvas.width = bannerState.width;
+            canvas.height = bannerState.height;
+
+            const { width, height } = bannerState;
+
+            // Clear canvas
+            ctx.clearRect(0, 0, width, height);
+
+            // Draw Gradient Background
+            let gradient;
+            switch (bannerState.gradient.direction) {
+                case 'to right': gradient = ctx.createLinearGradient(0, 0, width, 0); break;
+                case 'to left': gradient = ctx.createLinearGradient(width, 0, 0, 0); break;
+                case 'to bottom': gradient = ctx.createLinearGradient(0, 0, 0, height); break;
+                case 'to top': gradient = ctx.createLinearGradient(0, height, 0, 0); break;
+                case 'to bottom right': gradient = ctx.createLinearGradient(0, 0, width, height); break;
+                case 'to top left': gradient = ctx.createLinearGradient(width, height, 0, 0); break;
+                default: gradient = ctx.createLinearGradient(0, 0, 0, height); break; // Default to bottom
+            }
+
+            const numColors = bannerState.gradient.colors.length;
+            bannerState.gradient.colors.forEach((color, index) => {
+                gradient.addColorStop(index / (numColors - 1 || 1), color);
+            });
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+
+            // Draw Waves (Multiple Layers for depth)
+            bannerState.waves.forEach((waveParams, index) => {
+                drawWaveLayer(
+                    ctx,
+                    width,
+                    height,
+                    waveParams,
+                    bannerState.gradient.colors,
+                    index === 0 ? 0.2 : 0.6
+                );
+            });
+
+            // Draw Product Image
+            if (bannerState.productImage.imgObj && bannerState.productImage.imgObj.complete) {
+                const img = bannerState.productImage.imgObj;
+                const scaleFactor = bannerState.productImage.scale / 100;
+                const imgWidth = img.naturalWidth * scaleFactor;
+                const imgHeight = img.naturalHeight * scaleFactor;
+
+                // Center image by default, then apply offset
+                const imgX = (width / 2) - (imgWidth / 2) + bannerState.productImage.xOffset;
+                const imgY = (height / 2) - (imgHeight / 2) + bannerState.productImage.yOffset;
+
+                // Apply shadow if enabled
+                if (bannerState.productImage.shadow.enabled) {
+                    ctx.shadowColor = bannerState.productImage.shadow.color;
+                    ctx.shadowBlur = bannerState.productImage.shadow.blur;
+                    ctx.shadowOffsetX = bannerState.productImage.shadow.offsetX;
+                    ctx.shadowOffsetY = bannerState.productImage.shadow.offsetY;
+                }
+
+                ctx.drawImage(img, imgX, imgY, imgWidth, imgHeight);
+
+                // Reset shadow properties immediately after drawing the image
+                ctx.shadowColor = 'rgba(0,0,0,0)';
+                ctx.shadowBlur = 0;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 0;
+            }
+
+            // Draw Text Overlays
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            // Headline
+            ctx.fillStyle = bannerState.text.headline.color;
+            ctx.font = `${bannerState.text.headline.size}px "${bannerState.text.headline.font}", sans-serif`;
+            ctx.fillText(bannerState.text.headline.content, width / 2, height / 2 + bannerState.text.headline.yOffset);
+
+            // Sub Text
+            ctx.fillStyle = bannerState.text.subText.color;
+            ctx.font = `${bannerState.text.subText.size}px "${bannerState.text.subText.font}", sans-serif`;
+            ctx.fillText(bannerState.text.subText.content, width / 2, height / 2 + bannerState.text.subText.yOffset);
+
+            // Update previews after drawing
+            updatePreviewImages();
+        }
+
+        function drawWaveLayer(ctx, width, height, params, gradientColors, baseOpacity) {
+            const numColors = gradientColors.length;
+            const blendPos = params.colorBlend * (numColors - 1);
+            const colorIndex1 = Math.floor(blendPos);
+            const colorIndex2 = Math.min(numColors - 1, colorIndex1 + 1);
+            const amount = blendPos - colorIndex1;
+
+            let waveColor;
+            if (numColors === 1) {
+                waveColor = gradientColors[0];
+            } else if (colorIndex1 === colorIndex2) {
+                waveColor = gradientColors[colorIndex1];
+            } else {
+                waveColor = lerpColor(gradientColors[colorIndex1], gradientColors[colorIndex2], amount);
+            }
+
+            ctx.globalAlpha = params.opacity;
+            ctx.fillStyle = waveColor;
+
+            const startYOffset = height / 2 + params.heightAdjust;
+
+            ctx.beginPath();
+            ctx.moveTo(0, startYOffset + params.amplitude * Math.sin(params.offset));
+
+            const numPoints = 200;
+            for (let i = 0; i <= numPoints; i++) {
+                const x = (i / numPoints) * width;
+                const y = startYOffset + params.amplitude * Math.sin(x * params.frequency + params.offset);
+                if (i === 0) {
+                     ctx.moveTo(x, y);
+                } else {
+                    const prevX = ((i - 1) / numPoints) * width;
+                    const prevY = startYOffset + params.amplitude * Math.sin(prevX * params.frequency + params.offset);
+                    const controlX = (prevX + x) / 2;
+                    const controlY = startYOffset + params.amplitude * Math.sin(controlX * params.frequency + params.offset);
+                    ctx.quadraticCurveTo(prevX, prevY, x, y);
+                }
+            }
+
+            ctx.lineTo(width, height);
+            ctx.lineTo(0, height);
+            ctx.closePath();
+            ctx.fill();
+            ctx.globalAlpha = 1;
+        }
+
+        // --- Preview Logic ---
+        function updatePreviewImages() {
+            // Get the current banner image as a data URL
+            const dataURL = canvas.toDataURL('image/png');
+
+            // Set the src of all mock banner images to the current banner
+            previewHeroImage.src = dataURL;
+            previewProductCardImage.src = dataURL;
+            previewSliderImage.src = dataURL;
+        }
+
+        function switchPreviewMode(mode) {
+            previewSections.forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(`preview-${mode}`).classList.add('active');
+
+            previewModeButtons.forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.mode === mode) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+
+        // --- Event Listeners ---
+        const throttledDraw = debounce(drawBanner, 50);
+
+        // Banner Size
+        bannerWidthInput.addEventListener('input', (e) => { bannerState.width = parseInt(e.target.value); throttledDraw(); });
+        bannerHeightInput.addEventListener('input', (e) => { bannerState.height = parseInt(e.target.value); throttledDraw(); });
+
+        // Product Image
+        productImageUrlInput.addEventListener('input', (e) => {
+            bannerState.productImage.url = e.target.value;
+            if (e.target.value) {
+                const img = new Image();
+                img.crossOrigin = 'Anonymous'; // Required for loading images from different origins on canvas
+                img.onload = () => {
+                    bannerState.productImage.imgObj = img;
+                    drawBanner(); // Redraw once image is loaded
+                };
+                img.onerror = () => {
+                    console.error("Failed to load image:", e.target.value);
+                    bannerState.productImage.imgObj = null; // Clear image if load fails
+                    drawBanner(); // Redraw without image
+                };
+                img.src = e.target.value;
+            } else {
+                bannerState.productImage.imgObj = null;
+                drawBanner(); // Redraw if URL is cleared
+            }
+        });
+        imageScaleInput.addEventListener('input', (e) => { bannerState.productImage.scale = parseFloat(e.target.value); throttledDraw(); });
+        imageXInput.addEventListener('input', (e) => { bannerState.productImage.xOffset = parseInt(e.target.value); throttledDraw(); });
+        imageYInput.addEventListener('input', (e) => { bannerState.productImage.yOffset = parseInt(e.target.value); throttledDraw(); });
+
+        // NEW: Image Shadow Filters
+        shadowEnabledInput.addEventListener('change', (e) => { bannerState.productImage.shadow.enabled = e.target.checked; throttledDraw(); });
+        shadowColorInput.addEventListener('input', (e) => { bannerState.productImage.shadow.color = e.target.value; throttledDraw(); });
+        shadowBlurInput.addEventListener('input', (e) => { bannerState.productImage.shadow.blur = parseInt(e.target.value); throttledDraw(); });
+        shadowOffsetXInput.addEventListener('input', (e) => { bannerState.productImage.shadow.offsetX = parseInt(e.target.value); throttledDraw(); });
+        shadowOffsetYInput.addEventListener('input', (e) => { bannerState.productImage.shadow.offsetY = parseInt(e.target.value); throttledDraw(); });
+
+
+        // Gradient Colors
+        function setupGradientColorListeners() {
+            const colorInputs = gradientColorsContainer.querySelectorAll('input[type="color"]');
+            const removeButtons = gradientColorsContainer.querySelectorAll('.remove-color-btn');
+
+            colorInputs.forEach(input => {
+                input.oninput = (e) => {
+                    const index = parseInt(e.target.dataset.index);
+                    bannerState.gradient.colors[index] = e.target.value;
+                    throttledDraw();
+                };
+            });
+
+            if (colorInputs.length > 2) { // Allow removing if more than 2 colors
+                removeButtons.forEach(btn => {
+                    btn.style.display = 'inline-block';
+                    btn.onclick = (e) => {
+                        const indexToRemove = parseInt(e.target.previousElementSibling.dataset.index);
+                        bannerState.gradient.colors.splice(indexToRemove, 1);
+                        // Re-index remaining colors
+                        gradientColorsContainer.innerHTML = '';
+                        bannerState.gradient.colors.forEach((color, idx) => {
+                            addGradientColorInput(color, idx);
+                        });
+                        setupGradientColorListeners(); // Re-attach listeners
+                        throttledDraw();
+                    };
+                });
+            } else {
+                 removeButtons.forEach(btn => btn.style.display = 'none'); // Hide remove if only 2 colors
+            }
+        }
+
+        function addGradientColorInput(color = '#cccccc', index = bannerState.gradient.colors.length) {
+            const div = document.createElement('div');
+            div.className = 'color-input-wrapper';
+            div.innerHTML = `
+                <input type="color" value="${color}" data-index="${index}">
+                <button class="remove-color-btn">&times;</button>
+            `;
+            gradientColorsContainer.appendChild(div);
+            // Update data-index for new color if added not at end
+            gradientColorsContainer.querySelectorAll('input[type="color"]').forEach((input, idx) => {
+                input.dataset.index = idx;
+            });
+            setupGradientColorListeners(); // Re-attach listeners for all
+        }
+
+        addGradientColorBtn.addEventListener('click', () => {
+            if (bannerState.gradient.colors.length < 5) { // Limit to 5 colors for simplicity
+                bannerState.gradient.colors.push('#cccccc');
+                addGradientColorInput();
+                throttledDraw();
+            } else {
+                alert('Maximum 5 gradient colors allowed.');
+            }
+        });
+
+        // Initialize default colors
+        bannerState.gradient.colors.forEach((color, idx) => addGradientColorInput(color, idx));
+        setupGradientColorListeners();
+
+
+        gradientDirectionInput.addEventListener('input', (e) => { bannerState.gradient.direction = e.target.value; throttledDraw(); });
+
+        // Wave Layer 1
+        wave1AmplitudeInput.addEventListener('input', (e) => { bannerState.waves[0].amplitude = parseFloat(e.target.value); throttledDraw(); });
+        wave1FrequencyInput.addEventListener('input', (e) => { bannerState.waves[0].frequency = parseFloat(e.target.value); throttledDraw(); });
+        wave1OffsetInput.addEventListener('input', (e) => { bannerState.waves[0].offset = parseFloat(e.target.value); throttledDraw(); });
+        wave1OpacityInput.addEventListener('input', (e) => { bannerState.waves[0].opacity = parseFloat(e.target.value); throttledDraw(); });
+        wave1HeightAdjustInput.addEventListener('input', (e) => { bannerState.waves[0].heightAdjust = parseInt(e.target.value); throttledDraw(); });
+
+        // Wave Layer 2
+        wave2AmplitudeInput.addEventListener('input', (e) => { bannerState.waves[1].amplitude = parseFloat(e.target.value); throttledDraw(); });
+        wave2FrequencyInput.addEventListener('input', (e) => { bannerState.waves[1].frequency = parseFloat(e.target.value); throttledDraw(); });
+        wave2OffsetInput.addEventListener('input', (e) => { bannerState.waves[1].offset = parseFloat(e.target.value); throttledDraw(); });
+        wave2OpacityInput.addEventListener('input', (e) => { bannerState.waves[1].opacity = parseFloat(e.target.value); throttledDraw(); });
+        wave2HeightAdjustInput.addEventListener('input', (e) => { bannerState.waves[1].heightAdjust = parseInt(e.target.value); throttledDraw(); });
+
+        // Text Overlays
+        headlineTextInput.addEventListener('input', (e) => { bannerState.text.headline.content = e.target.value; throttledDraw(); });
+        headlineFontInput.addEventListener('change', (e) => { bannerState.text.headline.font = e.target.value; throttledDraw(); });
+        headlineColorInput.addEventListener('input', (e) => { bannerState.text.headline.color = e.target.value; throttledDraw(); });
+        headlineSizeInput.addEventListener('input', (e) => { bannerState.text.headline.size = parseInt(e.target.value); throttledDraw(); });
+        headlineYInput.addEventListener('input', (e) => { bannerState.text.headline.yOffset = parseInt(e.target.value); throttledDraw(); });
+
+        subTextInput.addEventListener('input', (e) => { bannerState.text.subText.content = e.target.value; throttledDraw(); });
+        subTextFontInput.addEventListener('change', (e) => { bannerState.text.subText.font = e.target.value; throttledDraw(); });
+        subTextColorInput.addEventListener('input', (e) => { bannerState.text.subText.color = e.target.value; throttledDraw(); });
+        subTextSizeInput.addEventListener('input', (e) => { bannerState.text.subText.size = parseInt(e.target.value); throttledDraw(); });
+        subTextYInput.addEventListener('input', (e) => { bannerState.text.subText.yOffset = parseInt(e.target.value); throttledDraw(); });
+
+        // Download Button
+        downloadBtn.addEventListener('click', () => {
+            const dataURL = canvas.toDataURL('image/png');
+            const a = document.createElement('a');
+            a.href = dataURL;
+            a.download = 'wavebanner.png';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
+
+        // Preview Mode Buttons
+        previewModeButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                switchPreviewMode(button.dataset.mode);
+            });
+        });
+
+
+        // --- Collapse/Expand Control Groups ---
+        document.querySelectorAll('.control-group h3').forEach(header => {
+            header.addEventListener('click', () => {
+                header.parentElement.classList.toggle('collapsed');
+            });
+        });
+
+        // --- Initial Draw on Page Load ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set initial values for font dropdowns based on state
+            headlineFontInput.value = bannerState.text.headline.font;
+            subTextFontInput.value = bannerState.text.subText.font;
+            // Set initial values for shadow inputs
+            shadowEnabledInput.checked = bannerState.productImage.shadow.enabled;
+            shadowColorInput.value = bannerState.productImage.shadow.color;
+            shadowBlurInput.value = bannerState.productImage.shadow.blur;
+            shadowOffsetXInput.value = bannerState.productImage.shadow.offsetX;
+            shadowOffsetYInput.value = bannerState.productImage.shadow.offsetY;
+
+            drawBanner(); // Initial draw
+        });
+    </script>
+</body>
+</html>
